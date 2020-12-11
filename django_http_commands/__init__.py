@@ -9,8 +9,8 @@ __url__ = "https://github.com/geosolutions-it/django-http-commands"
 __license__ = "GNU General Public License"
 
 
-class DjangoHttpConfig(AppConfig):
-    name = "django_http"
+class DjangoHttpCommandsConfig(AppConfig):
+    name = "django_http_commands"
     verbose_name = "Django HTTP Management Commands"
 
     def ready(self):
@@ -19,4 +19,4 @@ class DjangoHttpConfig(AppConfig):
         parse_management_commands()
 
 
-default_app_config = "django_http.DjangoHttpConfig"
+default_app_config = "django_http_commands.DjangoHttpCommandsConfig"
