@@ -2,18 +2,17 @@ import io
 
 from rest_framework import status, views
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
 from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import ManagementCommand
-from .utils import create_command_parser
+from .utils import create_command_parser, evaluate_permission_classes
 from .serializers import ManagementCommandSerializer
 
 
 class ManagementCommandView(views.APIView):
 
-    permission_classes = [IsAdminUser]
+    permission_classes = evaluate_permission_classes()
 
     def get(self, request, cmd=None, format=None):
 

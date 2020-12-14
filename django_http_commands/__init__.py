@@ -14,8 +14,9 @@ class DjangoHttpCommandsConfig(AppConfig):
     verbose_name = "Django HTTP Management Commands"
 
     def ready(self):
-        from ._app_utils import parse_management_commands
+        from ._app_utils import parse_management_commands, apply_default_settings
 
+        apply_default_settings()
         parse_management_commands()
 
 

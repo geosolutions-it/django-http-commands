@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.db.utils import ProgrammingError
 from django.core.management import get_commands
 
-from .models import ManagementCommand
+from django_http_commands.models import ManagementCommand
+from django_http_commands import settings as defult_settings
 
 
 def parse_management_commands() -> None:
@@ -25,3 +27,14 @@ def parse_management_commands() -> None:
         cmds_to_delete = set([cmd.name for cmd in ManagementCommand.objects.all()]) - set(commands.keys())
         if cmds_to_delete:
             ManagementCommand.objects.filter(name__in=cmds_to_delete).delete()
+
+
+def apply_default_settings():
+    """
+    Method applying default settings, if they are not present in the project settings
+    """
+
+    for name in dir(defult_settings):
+        if name.isupper() and not hasattr(settings, name):
+            # if setting is not present in settings, update settings with it
+            setattr(settings, name, getattr(defult_settings, name))
