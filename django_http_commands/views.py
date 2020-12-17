@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import ManagementCommand
-from .utils import create_command_parser, evaluate_permission_classes
+from .utils import create_command_parser, evaluate_permission_classes, Tee
 from .serializers import ManagementCommandSerializer
 
 
@@ -56,15 +56,26 @@ class ManagementCommandView(views.APIView):
         try:
             mgmt_cmd = queryset.get(name=cmd)
         except ObjectDoesNotExist:
-            return Response({'success': False, 'error': 'Command not found'},
+            return Response({'success': False, 'error': 'Command not found', 'log': None},
                             status=status.HTTP_404_NOT_FOUND)
 
         if "--help" in args:
-            return Response({'success': False, 'error': 'Forbidden argument: "--help"'},
+            return Response({'success': False, 'error': 'Forbidden argument: "--help"', 'log': None},
                             status=status.HTTP_400_BAD_REQUEST)
 
         with io.StringIO() as output:
-            call_command(mgmt_cmd.name, *args, **kwargs, stdout=output)
+            with Tee(output):
+                try:
+                    call_command(mgmt_cmd.name, *args, **kwargs, stdout=output)
+                except Exception as e:
+                    return Response(
+                        {
+                            'success': False,
+                            'log': output.getvalue(),
+                            'error': f'{str(type(e).__name__)}: {str(e)}'
+                        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
             logged_output = output.getvalue()
 
         response = {
