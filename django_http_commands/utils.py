@@ -1,4 +1,7 @@
+import io
+import sys
 import importlib
+
 from django.conf import settings
 from django.core import exceptions
 from django.core.exceptions import ImproperlyConfigured
@@ -54,3 +57,33 @@ def evaluate_permission_classes():
             )
 
     return permissions
+
+
+class Tee:
+    """
+    Class duplicating stdout and stderr to a specified file stream
+    """
+
+    def __init__(self, stream: io.StringIO):
+        self.stream = stream
+
+        self.stdout = sys.stdout
+        self.stderr = sys.stderr
+
+        sys.stdout = self
+        sys.stderr = self
+
+    def write(self, data):
+
+        self.stream.write(data)
+        self.stdout.write(data)
+
+    def flush(self):
+        self.stream.flush()
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, _type, _value, _traceback):
+        sys.stdout = self.stdout
+        sys.stderr = self.stderr
